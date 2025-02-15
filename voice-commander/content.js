@@ -3,10 +3,14 @@ function extractMainContent() {
     let documentClone = document.cloneNode(true);
     let reader = new Readability(documentClone);
     let article = reader.parse();
+    console.log("helo")
+    console.log("Checking if content.js is running!");
+
 
     if (article) {
         let words = article.textContent.split(/\s+/); 
         let summary = words.slice(0, 50).join(" "); 
+        console.log("extracting")
 
         
         chrome.runtime.sendMessage({

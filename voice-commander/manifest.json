@@ -10,11 +10,13 @@
     "background": {
         "service_worker": "background.js"
     },
-    "content_scripts": [
-        {
-            "matches": ["<all_urls>"],
-            "js": ["readability.js", "content.js"]
-        }
-    ]
+   "content_scripts": [
+    {
+        "matches": ["<all_urls>"],
+        "js": ["readability.js", "content.js"],
+        "run_at": "document_end"
+    }
+]
+
   }
   

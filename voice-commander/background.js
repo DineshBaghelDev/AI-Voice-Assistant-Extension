@@ -90,7 +90,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "voice_command") {
         let command = request.command.toLowerCase();
 
-        if (command.includes("summarize")) {
+        if (command.includes("summarise")) {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs.length === 0 || !tabs[0].url.startsWith("http")) {
                    
