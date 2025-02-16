@@ -1,0 +1,80 @@
+{
+  "metadata": {
+    "name": "extension",
+    "language_info": {
+      "name": "JavaScipt",
+      "version": "8.0"
+    }
+  },
+  "jsnbversion": "v0.1",
+  "cells": [
+    {
+      "code": "const readability = scrib.loadScript(\"https:/cdn.jsdelivr.net/npm/readability-js@1.0.7/src/readability.min.js\")",
+      "status": "[30]<br><span style=\"font-size:8px\">1ms<span></span></span>",
+      "output": "{} <br>",
+      "type": "code"
+    },
+    {
+      "code": "{\n    \"manifest_version\": 3,\n    \"name\": \"AI Assistant\",\n    \"version\": \"1.0\",\n    \"permissions\": [\n        \"activeTab\",\n        \"scripting\",\n        \"storage\",\n        \"tabs\",\n        \"webNavigation\",\n        \"webRequest\",\n        \"declarativeContent\",\n        \"contextMenus\",\n        \"alarms\",\n        \"notifications\"\n    ],\n    \"host_permissions\": [\n        \"<all_urls>\"\n    ],\n    \"action\": {\n        \"default_popup\": \"popup.html\",\n        \"default_icon\": {\n            \"16\": \"icon.png\",\n            \"24\": \"icon.png\",\n            \"32\": \"icon.png\"\n        }\n    },\n    \"background\": {\n        \"service_worker\": \"background.js\"\n    },\n    \"content_scripts\": [\n        {\n            \"matches\": [\n                \"<all_urls>\"\n            ],\n            \"js\": [\n                \"readability.js\",\n                \"content.js\"\n            ],\n            \"run_at\": \"document_end\"\n        }\n    ],\n    \"icons\": {\n    \"48\": \"icon.png\",\n    \"128\": \"icon.png\"\n  },\n  \"web_accessible_resources\": [\n    {\n      \"resources\": [\"readability.js\"],\n      \"matches\": [\"<all_urls>\"]\n    }\n  ]\n}",
+      "status": "[-]",
+      "output": "<p class=\"error\">Unexpected token ':'</p>",
+      "type": "code"
+    },
+    {
+      "code": "// popup.js\n\ndocument.addEventListener(\"DOMContentLoaded\", function () {\n    console.log(\"Popup.js loaded!\");\n\n    const startButton = document.getElementById(\"start\");\n    const stopButton = document.getElementById(\"stop\");\n    const status = document.getElementById(\"status\");\n    const result = document.getElementById(\"result\");\n\n    if (!startButton || !stopButton || !status || !result) {\n        console.error(\"Buttons not found in popup.html! Check element IDs.\");\n        return;\n    }\n\n    if (!window.hasRun) {\n        window.hasRun = true;\n\n        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();\n        recognition.continuous = false;\n        recognition.interimResults = false;\n        recognition.lang = \"en-US\";\n\n        recognition.onresult = function (event) {\n            const voiceInput = event.results[0][0].transcript.toLowerCase();\n            console.log(\"User said:\", voiceInput);\n            result.textContent = voiceInput;\n            chrome.runtime.sendMessage({ action: \"voice_command\", command: voiceInput });\n        };\n\n        recognition.onerror = function (event) {\n            console.error(\"Speech recognition error:\", event.error);\n        };\n\n        recognition.onend = function () {\n            console.log(\"Speech recognition stopped.\");\n            status.textContent = \"Not listening\";\n        };\n\n        startButton.addEventListener(\"click\", function () {\n            navigator.permissions.query({ name: \"microphone\" }).then(function (permissionStatus) {\n                if (permissionStatus.state === \"granted\") {\n                    navigator.mediaDevices.getUserMedia({ audio: true })\n                        .then(() => {\n                            console.log(\"Microphone access granted\");\n                            status.textContent = \"Listening...\";\n                            recognition.start();\n                        })\n                        .catch((err) => {\n                            console.error(\"Microphone access denied:\", err);\n                            alert(\"Please allow microphone access.\");\n                        });\n                } else {\n                    alert(\"Microphone access denied. Enable it in Chrome settings.\");\n                }\n            });\n        });\n\n        stopButton.addEventListener(\"click\", function () {\n            recognition.stop();\n        });\n\n        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {\n            console.log(\"Received message:\", message);\n\n            if (message.action === \"summarized_text\") {\n                if (message.error) {\n                    speakText(message.error);\n                } else {\n                    let summaryText = message.title + \"\\n\\n\" + message.content;\n                    speakText(summaryText);\n                }\n            }\n\n            sendResponse({ status: \"Message received\" });\n            return true;\n        });\n\n        function speakText(text) {\n            text += \"\\n\\n\"\n            let speech = new SpeechSynthesisUtterance(text);\n            speech.lang = \"en-US\";\n            speech.rate = 1.0;\n            speech.pitch = 1.0;\n            window.speechSynthesis.speak(speech);\n        }\n    }\n});\n",
+      "status": "[16]<br><span style=\"font-size:8px\">0ms<span></span></span>",
+      "output": "",
+      "type": "code"
+    },
+    {
+      "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Voice Assistant</title>\n  <link rel=\"stylesheet\" href=\"popup.css\">\n</head>\n<body >\n  <img src=\"icon.png\" width=\"100px\" alt=\"\">\n  <h1>AI Assistant</h1>\n  <p>Click on the microphone icon and speak to the AI Assistant</p>\n  <div class=\"mic\">\n    <button id=\"start\">Start</button>\n    <button id=\"stop\">Stop</button>\n  </div>\n  <div id=\"status\"></div>\n  <div id=\"result\"></div>\n  <script src=\"popup.js\"></script>\n</body>\n\n</html>",
+      "status": "",
+      "output": "\n\n\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Voice Assistant</title>\n  <link rel=\"stylesheet\" href=\"popup.css\">\n\n\n  <img src=\"icon.png\" width=\"100px\" alt=\"\">\n  <h1>AI Assistant</h1>\n  <p>Click on the microphone icon and speak to the AI Assistant</p>\n  <div class=\"mic\">\n    <button id=\"start\">Start</button>\n    <button id=\"stop\">Stop</button>\n  </div>\n  <div id=\"status\"></div>\n  <div id=\"result\"></div>\n  <script src=\"popup.js\"></script>\n\n\n",
+      "type": "html"
+    },
+    {
+      "code": "",
+      "status": "",
+      "output": "",
+      "type": "html"
+    },
+    {
+      "code": "<style>\n\n</style>",
+      "status": "",
+      "output": "<style>\n\n</style>",
+      "type": ""
+    },
+    {
+      "code": "<style>\n\n</style>",
+      "status": "",
+      "output": "<style>\n\n</style>",
+      "type": ""
+    },
+    {
+      "code": "<style>\n\n</style>",
+      "status": "",
+      "output": "<style>\n\n</style>",
+      "type": ""
+    },
+    {
+      "code": "// background.js\nchrome.runtime.onMessage.addListener((request, sender, sendResponse) => {\n    if (request.action === \"voice_command\") {\n        handleCommand(request.command);\n    }\n});\n\nfunction handleCommand(command) {\n    command = command.toLowerCase();\n\n    if (command.startsWith(\"open \")) {\n        let sites = command.replace(\"open \", \"\").split(\" and \");\n        sites.forEach(site => openWebsite(site.trim()));\n    } \n    else if (command.includes(\"open youtube\")) {\n        chrome.tabs.create({ url: \"https://www.youtube.com\" });\n    }\n    else if (command.includes(\"open google\")) {\n        chrome.tabs.create({ url: \"https://www.google.com\" });\n    }\n    else if (command.startsWith(\"close \")) {\n        let site = command.replace(\"close \", \"\").trim();\n        closeWebsite(site);\n    }\n    else if (command.startsWith(\"search for \")) {\n        let query = command.replace(\"search for \", \"\").trim();\n        searchGoogle(query);\n    }\n    else if (command.includes(\"scroll down\")) {\n        executeScriptOnActiveTab(() => window.scrollBy(0, 500));\n    }\n    else if (command.includes(\"scroll up\")) {\n        executeScriptOnActiveTab(() => window.scrollBy(0, -500));\n    }\n    else if (command.includes(\"next tab\")) {\n        switchTab(1);\n    }\n    else if (command.includes(\"previous tab\")) {\n        switchTab(-1);\n    }\n    else if (command.includes(\"go back\")) {\n        executeScriptOnActiveTab(() => history.back());\n    }\n    else if (command.includes(\"go forward\")) {\n        executeScriptOnActiveTab(() => history.forward());\n    }\n}\n\nfunction closeWebsite(site) {\n    chrome.tabs.query({}, (tabs) => {\n        for (let tab of tabs) {\n            if (tab.url.includes(site)) {\n                chrome.tabs.remove(tab.id);\n            }\n        }\n    });\n}\n\nfunction searchGoogle(query) {\n    let url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;\n    chrome.tabs.create({ url: url });\n}\n\nfunction openWebsite(site) {\n    let url = `https://www.${site}.com`; // Default to .com\n    chrome.tabs.create({ url: url });\n}\n\nfunction executeScriptOnActiveTab(func) {\n    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {\n        chrome.scripting.executeScript({\n            target: { tabId: tabs[0].id },\n            func: func,\n        });\n    });\n}\n\nfunction switchTab(direction) {\n    chrome.tabs.query({ currentWindow: true }, (tabs) => {\n        chrome.tabs.query({ active: true, currentWindow: true }, (activeTabs) => {\n            let currentIndex = activeTabs[0].index;\n            let newIndex = (currentIndex + direction + tabs.length) % tabs.length;\n            chrome.tabs.update(tabs[newIndex].id, { active: true });\n        });\n    });\n}\n\n\n\nchrome.runtime.onMessage.addListener((request, sender, sendResponse) => {\n    if (request.action === \"voice_command\") {\n        let command = request.command.toLowerCase();\n\n        if (command.includes(\"summarise\") || command.includes(\"read\")) {\n            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {\n                if (tabs.length === 0 || !tabs[0].url.startsWith(\"http\")) {\n                   \n                    chrome.runtime.sendMessage({ action: \"summarized_text\", error: \"Not on a webpage.\" });\n                    return;\n                }\n\n                \n                chrome.scripting.executeScript({\n                    target: { tabId: tabs[0].id },\n                    files: [\"content.js\"]\n                });\n            });\n        }\n\n     \n    }\n});\n",
+      "status": "[-]",
+      "output": "<p class=\"error\">Cannot read properties of undefined (reading 'onMessage')</p>",
+      "type": "code"
+    },
+    {
+      "code": "// content.js\n\n// Inject Readability and extract article text\nfunction extractMainContent() {\n    let documentClone = document.cloneNode(true);\n    let reader = new readability.Readability(documentClone);\n    let article = reader.parse();\n    console.log(\"hello\")\n    console.log(\"Checking if content.js is running!\");\n\n\n    if (article) {\n        let words = article.textContent.split(/\\s+/); \n        let summary = words.slice(0, 100).join(\" \"); \n        console.log(\"extracting\")\n\n        \n        chrome.runtime.sendMessage({\n            action: \"summarized_text\",\n            title: article.title,\n            content: summary\n        });\n    } else {\n        chrome.runtime.sendMessage({\n            action: \"summarized_text\",\n            error: \"Failed to extract content.\"\n        });\n    }\n}\n\n\nextractMainContent();\n",
+      "status": "[-]",
+      "output": "<p class=\"error\">readability is not defined</p>",
+      "type": "code"
+    },
+    {
+      "code": "<style>\n\n</style>",
+      "status": "",
+      "output": "<style>\n\n</style>",
+      "type": ""
+    }
+  ],
+  "source": "https://github.com/gopi-suvanam/scribbler",
+  "run_on_load": false
+}
