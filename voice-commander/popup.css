@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0px;
+    padding: 20px;
+    min-width: 300px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+button {
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 14px;
+}
+
+.mic{
+    display: flex;
+    gap: 10px;
+}
+
+#start{
+    background-color: #4CAF50;
+}
+#stop{
+    background-color: #f44336;
+}
+#start:hover {
+    background-color: #01c70b;
+    transform: scale(1.05);
+}
+#stop:hover {
+    background-color: #9e3017;
+    transform: scale(1.05);
+}
